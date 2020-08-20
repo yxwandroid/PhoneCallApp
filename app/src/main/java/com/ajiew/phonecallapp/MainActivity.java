@@ -15,6 +15,7 @@ import android.telephony.TelephonyManager;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private Switch switchPhoneCall;
 
     private Switch switchListenCall;
+    private EditText callNumber;
 
     private CompoundButton.OnCheckedChangeListener switchCallCheckChangeListener;
     private TelephonyManager telephonyManager;
@@ -55,12 +57,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void initView() {
         switchPhoneCall = findViewById(R.id.switch_default_phone_call);
+        callNumber = findViewById(R.id.call_number);
         switchListenCall = findViewById(R.id.switch_call_listenr);
         findViewById(R.id.call_phone).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 //                callPhone("18518318385");
-                callPhone("13564106378");
+                String number = callNumber.getText().toString();
+                if (number!=null){
+                    callPhone(number);
+                }
+//                callPhone("13564106378");
 //                callPhone("13023125014");
 
             }

@@ -1,4 +1,4 @@
-package com.ajiew.phonecallapp.phonecallui;
+package com.ajiew.phonecallapp.callui;
 
 import android.os.Build;
 import android.support.annotation.RequiresApi;
@@ -6,6 +6,8 @@ import android.telecom.Call;
 import android.telecom.InCallService;
 
 import com.ajiew.phonecallapp.ActivityStack;
+import com.ajiew.phonecallapp.App;
+import com.ajiew.phonecallapp.record.PhoneRecord;
 import com.orhanobut.logger.Logger;
 
 import org.greenrobot.eventbus.EventBus;
@@ -17,6 +19,9 @@ import org.greenrobot.eventbus.EventBus;
 @RequiresApi(api = Build.VERSION_CODES.M)
 public class PhoneCallService extends InCallService {
 
+
+    private String seek = "0";
+    private String mPhoneNumber = "";
     private Call.Callback callback = new Call.Callback() {
         @Override
         public void onStateChanged(Call call, int state) {
@@ -28,6 +33,8 @@ public class PhoneCallService extends InCallService {
                     //积极支持对话时的状态 Call 建立连接
                     Logger.d("wilson PhoneCallService STATE_ACTIVE 开始通话阶段");
                     EventBus.getDefault().post(new MessageEvent("开始通话"));
+//                    PhoneRecord2.instance.startRecord();
+                    PhoneRecord.startRecord(seek, mPhoneNumber);
                     break;
                 }
 
@@ -38,6 +45,8 @@ public class PhoneCallService extends InCallService {
                 }
                 case Call.STATE_DISCONNECTED: {
                     Logger.d("wilson PhoneCallService STATE_DISCONNECTED 断开通话阶段");
+                    PhoneRecord.stopRecord(App.context);
+//                    PhoneRecord2.instance.stopRecord();
                     //断开连接状态
                     ActivityStack.getInstance().finishActivity(PhoneCallActivity.class);
                     break;
@@ -58,13 +67,16 @@ public class PhoneCallService extends InCallService {
 
         if (call.getState() == Call.STATE_RINGING) {
             callType = CallType.CALL_IN;
+            seek = "1";
         } else if (call.getState() == Call.STATE_CONNECTING) {
+            seek = "0";
             callType = CallType.CALL_OUT;
         }
 
         if (callType != null) {
             Call.Details details = call.getDetails();
             String phoneNumber = details.getHandle().getSchemeSpecificPart();
+            mPhoneNumber = phoneNumber;
             PhoneCallActivity.actionStart(this, phoneNumber, callType);
         }
     }

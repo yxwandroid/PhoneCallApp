@@ -1,4 +1,4 @@
-package com.ajiew.phonecallapp.phonecallui;
+package com.ajiew.phonecallapp.callui;
 
 public class MessageEvent {
 

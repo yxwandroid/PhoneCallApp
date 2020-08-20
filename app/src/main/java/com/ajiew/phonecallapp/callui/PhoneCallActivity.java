@@ -1,4 +1,4 @@
-package com.ajiew.phonecallapp.phonecallui;
+package com.ajiew.phonecallapp.callui;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
