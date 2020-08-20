@@ -13,6 +13,11 @@ import android.widget.TextView;
 
 import com.ajiew.phonecallapp.ActivityStack;
 import com.ajiew.phonecallapp.R;
+import com.orhanobut.logger.Logger;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -120,24 +125,47 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
         if (v.getId() == R.id.tv_phone_pick_up) {
             phoneCallManager.answer();
             tvPickUp.setVisibility(View.GONE);
-            tvCallingTime.setVisibility(View.VISIBLE);
-            onGoingCallTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    runOnUiThread(new Runnable() {
-                        @SuppressLint("SetTextI18n")
-                        @Override
-                        public void run() {
-                            callingTime++;
-                            tvCallingTime.setText("通话中：" + getCallingTime());
-                        }
-                    });
-                }
-            }, 0, 1000);
+            startCallTime();
         } else if (v.getId() == R.id.tv_phone_hang_up) {
             phoneCallManager.disconnect();
             stopTimer();
         }
+    }
+
+
+    private void startCallTime() {
+        tvCallingTime.setVisibility(View.VISIBLE);
+        onGoingCallTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void run() {
+                        callingTime++;
+                        tvCallingTime.setText("通话中：" + getCallingTime());
+                    }
+                });
+            }
+        }, 0, 1000);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(MessageEvent event) {
+        Logger.d("wilson PhoneCallActivity  接通电话");
+        startCallTime();
     }
 
     private String getCallingTime() {

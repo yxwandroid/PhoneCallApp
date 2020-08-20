@@ -8,6 +8,8 @@ import android.telecom.InCallService;
 import com.ajiew.phonecallapp.ActivityStack;
 import com.orhanobut.logger.Logger;
 
+import org.greenrobot.eventbus.EventBus;
+
 
 /**
  * 监听电话通信状态的服务，实现该类的同时必须提供电话管理的 UI
@@ -25,8 +27,10 @@ public class PhoneCallService extends InCallService {
                 case Call.STATE_ACTIVE: {
                     //积极支持对话时的状态 Call 建立连接
                     Logger.d("wilson PhoneCallService STATE_ACTIVE 开始通话阶段");
+                    EventBus.getDefault().post(new MessageEvent("开始通话"));
                     break;
                 }
+
                 case Call.STATE_DIALING: {
                     //拨打远程号码时，拨出 Call的状态，但尚未连接。
                     Logger.d("wilson PhoneCallService STATE_DIALING 响铃阶段");
