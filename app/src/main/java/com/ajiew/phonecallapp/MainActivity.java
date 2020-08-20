@@ -11,6 +11,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telecom.TelecomManager;
+import android.telephony.TelephonyManager;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.Switch;
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private Switch switchListenCall;
 
     private CompoundButton.OnCheckedChangeListener switchCallCheckChangeListener;
+    private TelephonyManager telephonyManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -37,9 +40,31 @@ public class MainActivity extends AppCompatActivity {
         initView();
     }
 
+
+    /**
+     * 拨打电话（直接拨打电话）
+     *
+     * @param phoneNum 电话号码
+     */
+    public void callPhone(String phoneNum) {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        Uri data = Uri.parse("tel:" + phoneNum);
+        intent.setData(data);
+        startActivity(intent);
+    }
+
     private void initView() {
         switchPhoneCall = findViewById(R.id.switch_default_phone_call);
         switchListenCall = findViewById(R.id.switch_call_listenr);
+        findViewById(R.id.call_phone).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                callPhone("18518318385");
+                callPhone("13564106378");
+//                callPhone("13023125014");
+
+            }
+        });
 
         switchPhoneCall.setOnClickListener(v -> {
             // 发起将本应用设为默认电话应用的请求，仅支持 Android M 及以上
