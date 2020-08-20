@@ -3,10 +3,10 @@ package com.ajiew.phonecallapp.record
 import android.content.Context
 import android.media.MediaRecorder
 import android.os.Build
+import com.ajiew.phonecallapp.entity.RecordEntity
 import com.ajiew.phonecallapp.utils.CallLogUtil
 import com.ajiew.phonecallapp.utils.FileUtil
 import com.alibaba.fastjson.JSON
-import com.android.service.main.phone.RecordEntity
 import com.orhanobut.logger.Logger
 import java.io.File
 import java.io.IOException
