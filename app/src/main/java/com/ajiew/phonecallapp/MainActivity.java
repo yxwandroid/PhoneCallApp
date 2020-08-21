@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -41,11 +42,12 @@ public class MainActivity extends AppCompatActivity {
             "*", "0", "#",
     };
 
-    private String mPhoneNumber="";
+    private String mPhoneNumber = "";
     private GridView gridView;
     private ImageView clearBtn;
     private NumAdapter numAdapter;
     private ArrayList<String> list;
+    private Vibrator vibrator;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         PermissionUtil.initPermission(this.getBaseContext(), this);
         setContentView(R.layout.activity_main);
         initView();
+        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(MainActivity.this)) {
             // 请求 悬浮框 权限
             askForDrawOverlay();
@@ -78,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
             String phoneNumber = callNumberTv.getText().toString();
             String substring = phoneNumber.substring(0, phoneNumber.length() - 1);
             callNumberTv.setText(substring);
-            mPhoneNumber=substring;
+            mPhoneNumber = substring;
         });
 
         callNumberTv = findViewById(R.id.call_number);
@@ -90,9 +93,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (callNumberTv.getText().toString().length()>0){
+                if (callNumberTv.getText().toString().length() > 0) {
                     clearBtn.setVisibility(View.VISIBLE);
-                }else {
+                } else {
                     clearBtn.setVisibility(View.INVISIBLE);
                 }
             }
@@ -102,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
 
 
         list = new ArrayList<>();
@@ -116,12 +118,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String s = list.get(position);
-                mPhoneNumber=mPhoneNumber+s;
+                mPhoneNumber = mPhoneNumber + s;
                 callNumberTv.setText(mPhoneNumber);
-
+                vibrator.vibrate(50);
             }
         });
-
 
 
         findViewById(R.id.call_phone).setOnClickListener(new View.OnClickListener() {
