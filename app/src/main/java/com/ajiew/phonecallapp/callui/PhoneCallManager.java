@@ -1,5 +1,6 @@
 package com.ajiew.phonecallapp.callui;
 
+
 import android.content.Context;
 import android.media.AudioManager;
 import android.os.Build;
@@ -7,18 +8,24 @@ import android.support.annotation.RequiresApi;
 import android.telecom.Call;
 import android.telecom.VideoProfile;
 
-
 @RequiresApi(api = Build.VERSION_CODES.M)
 public class PhoneCallManager {
 
-    public static Call call;
+    public  Call call;
 
-    private Context context;
     private AudioManager audioManager;
 
-    public PhoneCallManager(Context context) {
-        this.context = context;
+    private static PhoneCallManager instance = new PhoneCallManager();
 
+    private PhoneCallManager() {
+
+    }
+
+    public static PhoneCallManager getInstance() {
+        return instance;
+    }
+
+    public void initAudioManager(Context context) {
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 
@@ -53,10 +60,9 @@ public class PhoneCallManager {
 
     /**
      * 销毁资源
-     * */
+     */
     public void destroy() {
         call = null;
-        context = null;
         audioManager = null;
     }
 }

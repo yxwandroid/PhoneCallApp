@@ -19,7 +19,11 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.ajiew.phonecallapp.callui.PhoneCallActivity;
+import com.ajiew.phonecallapp.callui.PhoneCallManager;
 import com.ajiew.phonecallapp.listenphonecall.CallListenerService;
+import com.ajiew.phonecallapp.utils.PermissionUtil;
+import com.orhanobut.logger.Logger;
 
 import java.lang.reflect.Field;
 
@@ -37,9 +41,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        PermissionUtil.initPermission(this.getBaseContext(), this);
         setContentView(R.layout.activity_main);
 
         initView();
+
+
     }
 
 
@@ -62,11 +69,18 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.call_phone).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                callPhone("18518318385");
-                String number = callNumber.getText().toString();
-                if (number!=null){
-                    callPhone(number);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (PhoneCallManager.getInstance().call != null) {
+                        Toast.makeText(MainActivity.this, "当前正在通话", Toast.LENGTH_LONG).show();
+                        return;
+                    } else {
+                        String number = callNumber.getText().toString();
+                        if (number != null) {
+                            callPhone(number);
+                        }
+                    }
                 }
+//                callPhone("18518318385");
 //                callPhone("13564106378");
 //                callPhone("13023125014");
 
@@ -191,4 +205,6 @@ public class MainActivity extends AppCompatActivity {
 
         return false;
     }
+
+
 }

@@ -3,7 +3,9 @@ package com.ajiew.phonecallapp;
 import android.Manifest;
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 
+import com.ajiew.phonecallapp.listenphonecall.CallListenerService;
 import com.ajiew.phonecallapp.logger.FileFormatStrategy;
 import com.ajiew.phonecallapp.utils.PermissionUtil;
 import com.orhanobut.logger.AndroidLogAdapter;
@@ -23,6 +25,8 @@ public class App extends Application {
 
 //        CallRecord builder = new CallRecord(this);
 //        builder.startCallReceiver();
+        Intent callListener = new Intent(this, CallListenerService.class);
+        startService(callListener);
 
         if (PermissionUtil.checkHasPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             FormatStrategy fileFormatStrategy = FileFormatStrategy.newBuilder()

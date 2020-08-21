@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -39,7 +40,6 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
     private TextView tvCallingTime;
     private TextView tvHangUp;
 
-    private PhoneCallManager phoneCallManager;
     private PhoneCallService.CallType callType;
     private String phoneNumber;
 
@@ -68,7 +68,7 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void initData() {
-        phoneCallManager = new PhoneCallManager(this);
+        PhoneCallManager.getInstance().initAudioManager(this);
         onGoingCallTimer = new Timer();
         if (getIntent() != null) {
             phoneNumber = getIntent().getStringExtra(Intent.EXTRA_PHONE_NUMBER);
@@ -103,7 +103,7 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
         else if (callType == PhoneCallService.CallType.CALL_OUT) {
             tvCallNumberLabel.setText("呼叫号码");
             tvPickUp.setVisibility(View.GONE);
-            phoneCallManager.openSpeaker();
+            PhoneCallManager.getInstance().openSpeaker();
         }
 
         showOnLockScreen();
@@ -123,11 +123,11 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.tv_phone_pick_up) {
-            phoneCallManager.answer();
+            PhoneCallManager.getInstance().answer();
             tvPickUp.setVisibility(View.GONE);
             startCallTime();
         } else if (v.getId() == R.id.tv_phone_hang_up) {
-            phoneCallManager.disconnect();
+            PhoneCallManager.getInstance().disconnect();
             stopTimer();
         }
     }
@@ -162,6 +162,19 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
         EventBus.getDefault().unregister(this);
     }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        EventBus.getDefault().post(new NotificationMessageEvent(NotificationState.Hide));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        EventBus.getDefault().post(new NotificationMessageEvent(NotificationState.Show));
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(MessageEvent event) {
         Logger.d("wilson PhoneCallActivity  接通电话");
@@ -185,9 +198,21 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
     }
 
     @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event)
+    {
+        if(event.getAction() == KeyEvent.ACTION_UP){
+            if(keyCode == KeyEvent.KEYCODE_BACK){
+                moveTaskToBack(true);
+                return true;
+            }
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        phoneCallManager.destroy();
+        EventBus.getDefault().post(new NotificationMessageEvent(NotificationState.Hide));
+        PhoneCallManager.getInstance().destroy();
     }
 }

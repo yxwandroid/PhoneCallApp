@@ -17,7 +17,7 @@ object PhoneRecord {
     private var isRecordStarted = false
     private var recordEntity: RecordEntity? = null;
     private var mNumber: String? = null;
-    private const val RECORD_PATH = "/sdcard/acWechat/WechatRecord"
+    private  val RECORD_PATH = "/sdcard/acWechat/WechatRecord"
     private var recorder: MediaRecorder? = null
 
     /**
@@ -60,6 +60,7 @@ object PhoneRecord {
             releaseMediaRecorder()
         }
     }
+
 
     @JvmStatic
     fun stopRecord(context: Context) {

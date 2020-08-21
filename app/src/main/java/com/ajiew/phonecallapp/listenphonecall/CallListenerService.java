@@ -20,8 +20,15 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.ajiew.phonecallapp.MainActivity;
 import com.ajiew.phonecallapp.R;
+import com.ajiew.phonecallapp.callui.NotificationMessageEvent;
+import com.ajiew.phonecallapp.callui.NotificationState;
+import com.ajiew.phonecallapp.callui.PhoneCallActivity;
+import com.orhanobut.logger.Logger;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 
 public class CallListenerService extends Service {
@@ -47,6 +54,7 @@ public class CallListenerService extends Service {
         initPhoneStateListener();
 
         initPhoneCallView();
+        EventBus.getDefault().register(this);
     }
 
     @Nullable
@@ -63,29 +71,28 @@ public class CallListenerService extends Service {
             @Override
             public void onCallStateChanged(int state, String incomingNumber) {
                 super.onCallStateChanged(state, incomingNumber);
-
                 callNumber = incomingNumber;
 
-                switch (state) {
-                    case TelephonyManager.CALL_STATE_IDLE: // 待机，即无电话时，挂断时触发
-                        dismiss();
-                        break;
-
-                    case TelephonyManager.CALL_STATE_RINGING: // 响铃，来电时触发
-                        isCallingIn = true;
-                        updateUI();
-                        show();
-                        break;
-
-                    case TelephonyManager.CALL_STATE_OFFHOOK: // 摘机，接听或拨出电话时触发
-                        updateUI();
-                        show();
-                        break;
-
-                    default:
-                        break;
-
-                }
+//                switch (state) {
+//                    case TelephonyManager.CALL_STATE_IDLE: // 待机，即无电话时，挂断时触发
+//                      //  dismiss();
+//                        break;
+//
+//                    case TelephonyManager.CALL_STATE_RINGING: // 响铃，来电时触发
+//                        isCallingIn = true;
+//                        updateUI();
+//                        show();
+//                        break;
+//
+//                    case TelephonyManager.CALL_STATE_OFFHOOK: // 摘机，接听或拨出电话时触发
+//                        updateUI();
+//                        show();
+//                        break;
+//
+//                    default:
+//                        break;
+//
+//                }
             }
         };
 
@@ -150,8 +157,8 @@ public class CallListenerService extends Service {
         tvCallNumber = phoneCallView.findViewById(R.id.tv_call_number);
         btnOpenApp = phoneCallView.findViewById(R.id.btn_open_app);
         btnOpenApp.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Intent intent = new Intent(getApplicationContext(), PhoneCallActivity.class);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             CallListenerService.this.startActivity(intent);
         });
     }
@@ -177,6 +184,27 @@ public class CallListenerService extends Service {
         }
     }
 
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onNotificationMessageEvent(NotificationMessageEvent event) {
+        Logger.d("wilson 接收到通话栏显示隐藏 "+event);
+        NotificationState mNotificationState = event.mNotificationState;
+        switch (mNotificationState) {
+            case Hide: {
+                dismiss();
+                break;
+        }
+            case Show: {
+                show();
+                break;
+            }
+        }
+
+    }
+
+
+
+
     private void updateUI() {
         tvCallNumber.setText(formatPhoneNumber(callNumber));
 
@@ -197,7 +225,7 @@ public class CallListenerService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
+        EventBus.getDefault().unregister(this);
         telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
     }
 }

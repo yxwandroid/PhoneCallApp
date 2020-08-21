@@ -6,8 +6,6 @@ import android.telecom.Call;
 import android.telecom.InCallService;
 
 import com.ajiew.phonecallapp.ActivityStack;
-import com.ajiew.phonecallapp.App;
-import com.ajiew.phonecallapp.record.PhoneRecord;
 import com.orhanobut.logger.Logger;
 
 import org.greenrobot.eventbus.EventBus;
@@ -18,7 +16,6 @@ import org.greenrobot.eventbus.EventBus;
  */
 @RequiresApi(api = Build.VERSION_CODES.M)
 public class PhoneCallService extends InCallService {
-
 
     private String seek = "0";
     private String mPhoneNumber = "";
@@ -33,11 +30,9 @@ public class PhoneCallService extends InCallService {
                     //积极支持对话时的状态 Call 建立连接
                     Logger.d("wilson PhoneCallService STATE_ACTIVE 开始通话阶段");
                     EventBus.getDefault().post(new MessageEvent("开始通话"));
-//                    PhoneRecord2.instance.startRecord();
-                    PhoneRecord.startRecord(seek, mPhoneNumber);
+                    //  PhoneRecord.startRecord(seek, mPhoneNumber);
                     break;
                 }
-
                 case Call.STATE_DIALING: {
                     //拨打远程号码时，拨出 Call的状态，但尚未连接。
                     Logger.d("wilson PhoneCallService STATE_DIALING 响铃阶段");
@@ -45,10 +40,9 @@ public class PhoneCallService extends InCallService {
                 }
                 case Call.STATE_DISCONNECTED: {
                     Logger.d("wilson PhoneCallService STATE_DISCONNECTED 断开通话阶段");
-                    PhoneRecord.stopRecord(App.context);
-//                    PhoneRecord2.instance.stopRecord();
-                    //断开连接状态
+                    // PhoneRecord.stopRecord(App.context);
                     ActivityStack.getInstance().finishActivity(PhoneCallActivity.class);
+                    //断开连接状态
                     break;
                 }
 
@@ -60,23 +54,27 @@ public class PhoneCallService extends InCallService {
     public void onCallAdded(Call call) {
         super.onCallAdded(call);
         Logger.d("wilson PhoneCallService onCallAdded  ");
+
+        if (PhoneCallManager.getInstance().call!= null) {
+            call.disconnect();
+            Logger.d("wilson PhoneCallService onCallAdded  已存在通话");
+            return;
+        }
+        PhoneCallManager.getInstance().call = call;
         call.registerCallback(callback);
-        PhoneCallManager.call = call;
-
         CallType callType = null;
-
         if (call.getState() == Call.STATE_RINGING) {
             callType = CallType.CALL_IN;
-            seek = "1";
-        } else if (call.getState() == Call.STATE_CONNECTING) {
             seek = "0";
+        } else if (call.getState() == Call.STATE_CONNECTING) {
+            seek = "1";
             callType = CallType.CALL_OUT;
         }
-
         if (callType != null) {
             Call.Details details = call.getDetails();
             String phoneNumber = details.getHandle().getSchemeSpecificPart();
             mPhoneNumber = phoneNumber;
+            Logger.d("wilson PhoneCallService onCallAdded  mPhoneNumber  " + mPhoneNumber);
             PhoneCallActivity.actionStart(this, phoneNumber, callType);
         }
     }
@@ -84,9 +82,12 @@ public class PhoneCallService extends InCallService {
     @Override
     public void onCallRemoved(Call call) {
         super.onCallRemoved(call);
-        Logger.d("wilson PhoneCallService onCallRemoved  ");
+        Call.Details details = call.getDetails();
+        String phoneNumber = details.getHandle().getSchemeSpecificPart();
+        mPhoneNumber = "";
+        Logger.d("wilson PhoneCallService onCallRemoved  mPhoneNumber " + phoneNumber);
         call.unregisterCallback(callback);
-        PhoneCallManager.call = null;
+        PhoneCallManager.getInstance().call = null;
     }
 
     public enum CallType {
