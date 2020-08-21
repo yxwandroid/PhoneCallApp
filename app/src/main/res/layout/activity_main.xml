@@ -1,53 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_gravity="center">
 
     <Switch
         android:id="@+id/switch_default_phone_call"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="30dp"
         android:layout_marginRight="16dp"
-        android:text="设为默认电话应用" />
+        android:text="设置为默认电话应用" />
 
-    <Switch
-        android:id="@+id/switch_call_listenr"
+    <LinearLayout
+        android:id="@+id/ll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/switch_default_phone_call"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginRight="16dp"
-        android:text="开启电话监听服务" />
+        android:layout_below="@+id/switch_default_phone_call"
+        android:layout_marginTop="121dp"
+        android:layout_marginBottom="20dp"
+        android:gravity="center">
+
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="6"
+            android:src="@drawable/ic_phone_call_in"
+            android:visibility="invisible"></ImageButton>
+
+        <TextView
+            android:id="@+id/call_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:background="@null"
+            android:gravity="center"
+            android:hint="请输入手机号"
+            android:inputType="phone"
+            android:text=""
+            android:textSize="25dp" />
+
+        <ImageView
+            android:id="@+id/clearBtn"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_weight="6"
+            android:scaleType="fitCenter"
+            android:src="@mipmap/clear_btn"
+            android:visibility="invisible"
+            ></ImageView>
+
+    </LinearLayout>
+
+
+    <GridView
+        android:verticalSpacing="20dp"
+        android:id="@+id/gv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ll"
+        android:gravity="center"
+        android:numColumns="3"
+        android:scrollbars="none">
+
+    </GridView>
+
 
     <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:text="Call App"
-        android:textSize="28sp" />
-
-    <EditText
-        android:id="@+id/call_number"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tv_title"
-        android:layout_marginTop="8dp"
-        android:gravity="center"
-        android:text="13564106378" />
-
-    <Button
         android:id="@+id/call_phone"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/call_number"
-        android:layout_marginTop="8dp"
-        android:gravity="center"
-        android:text="拨打电话" />
+        android:layout_below="@id/gv"
+        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="10dp"
+        android:drawableTop="@drawable/ic_phone_pick_up"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:visibility="visible"
+        tools:visibility="visible" />
 
 
 </RelativeLayout>

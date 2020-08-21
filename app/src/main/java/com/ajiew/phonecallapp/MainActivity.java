@@ -1,6 +1,6 @@
 package com.ajiew.phonecallapp;
 
-import android.app.ActivityManager;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -11,50 +11,59 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telecom.TelecomManager;
-import android.telephony.TelephonyManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.CompoundButton;
-import android.widget.EditText;
+import android.widget.AdapterView;
+import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ajiew.phonecallapp.callui.PhoneCallActivity;
 import com.ajiew.phonecallapp.callui.PhoneCallManager;
-import com.ajiew.phonecallapp.listenphonecall.CallListenerService;
+import com.ajiew.phonecallapp.adapter.NumAdapter;
 import com.ajiew.phonecallapp.utils.PermissionUtil;
-import com.orhanobut.logger.Logger;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private Switch switchPhoneCall;
+    private TextView callNumberTv;
+    private String[] images = {
+            "1", "2", "3",
+            "4", "5", "6",
+            "7", "8", "9",
+            "*", "0", "#",
+    };
 
-    private Switch switchListenCall;
-    private EditText callNumber;
-
-    private CompoundButton.OnCheckedChangeListener switchCallCheckChangeListener;
-    private TelephonyManager telephonyManager;
+    private String mPhoneNumber="";
+    private GridView gridView;
+    private ImageView clearBtn;
+    private NumAdapter numAdapter;
+    private ArrayList<String> list;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         PermissionUtil.initPermission(this.getBaseContext(), this);
         setContentView(R.layout.activity_main);
-
         initView();
-
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(MainActivity.this)) {
+            // 请求 悬浮框 权限
+            askForDrawOverlay();
+        }
     }
 
 
     /**
      * 拨打电话（直接拨打电话）
-     *
-     * @param phoneNum 电话号码
      */
+    @SuppressLint("MissingPermission")
     public void callPhone(String phoneNum) {
         Intent intent = new Intent(Intent.ACTION_CALL);
         Uri data = Uri.parse("tel:" + phoneNum);
@@ -64,8 +73,57 @@ public class MainActivity extends AppCompatActivity {
 
     private void initView() {
         switchPhoneCall = findViewById(R.id.switch_default_phone_call);
-        callNumber = findViewById(R.id.call_number);
-        switchListenCall = findViewById(R.id.switch_call_listenr);
+        clearBtn = findViewById(R.id.clearBtn);
+        clearBtn.setOnClickListener(v -> {
+            String phoneNumber = callNumberTv.getText().toString();
+            String substring = phoneNumber.substring(0, phoneNumber.length() - 1);
+            callNumberTv.setText(substring);
+            mPhoneNumber=substring;
+        });
+
+        callNumberTv = findViewById(R.id.call_number);
+        callNumberTv.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (callNumberTv.getText().toString().length()>0){
+                    clearBtn.setVisibility(View.VISIBLE);
+                }else {
+                    clearBtn.setVisibility(View.INVISIBLE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+
+
+        list = new ArrayList<>();
+        for (int i = 0; i < images.length; i++) {
+            list.add(images[i]);
+        }
+        numAdapter = new NumAdapter(list, this);
+        gridView = findViewById(R.id.gv);
+        gridView.setAdapter(numAdapter);
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String s = list.get(position);
+                mPhoneNumber=mPhoneNumber+s;
+                callNumberTv.setText(mPhoneNumber);
+
+            }
+        });
+
+
+
         findViewById(R.id.call_phone).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,15 +132,12 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "当前正在通话", Toast.LENGTH_LONG).show();
                         return;
                     } else {
-                        String number = callNumber.getText().toString();
+                        String number = callNumberTv.getText().toString();
                         if (number != null) {
                             callPhone(number);
                         }
                     }
                 }
-//                callPhone("18518318385");
-//                callPhone("13564106378");
-//                callPhone("13023125014");
 
             }
         });
@@ -106,31 +161,6 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        // 检查是否开启了权限
-        switchCallCheckChangeListener = (buttonView, isChecked) -> {
-            if (isChecked && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                    && !Settings.canDrawOverlays(MainActivity.this)
-            ) {
-                // 请求 悬浮框 权限
-                askForDrawOverlay();
-
-                // 未开启时清除选中状态，同时避免回调
-                switchListenCall.setOnCheckedChangeListener(null);
-                switchListenCall.setChecked(false);
-                switchListenCall.setOnCheckedChangeListener(switchCallCheckChangeListener);
-                return;
-            }
-
-            Intent callListener = new Intent(MainActivity.this, CallListenerService.class);
-            if (isChecked) {
-                startService(callListener);
-                Toast.makeText(this, "电话监听服务已开启", Toast.LENGTH_SHORT).show();
-            } else {
-                stopService(callListener);
-                Toast.makeText(this, "电话监听服务已关闭", Toast.LENGTH_SHORT).show();
-            }
-        };
-        switchListenCall.setOnCheckedChangeListener(switchCallCheckChangeListener);
     }
 
     private void askForDrawOverlay() {
@@ -177,7 +207,6 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
         switchPhoneCall.setChecked(isDefaultPhoneCallApp());
-        switchListenCall.setChecked(isServiceRunning(CallListenerService.class));
     }
 
     /**
@@ -190,19 +219,6 @@ public class MainActivity extends AppCompatActivity {
                 return manger.getDefaultDialerPackage().equals(getPackageName());
             }
         }
-        return false;
-    }
-
-    public boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        if (manager == null) return false;
-
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-
         return false;
     }
 
