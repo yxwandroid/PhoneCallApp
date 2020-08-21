@@ -5,27 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/colorPrimary">
-
-    <TextView
-        android:id="@+id/tv_call_number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp"
-        android:gravity="center"
-        android:textAlignment="center"
-        android:textColor="@color/colorAccent"
-        android:textSize="18sp"
-        tools:text="133-8892-9579" />
-
     <Button
+        android:layout_marginTop="15dp"
         android:id="@+id/btn_open_app"
         style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tv_call_number"
         android:gravity="center"
-        android:text="打开 Phone Call App"
+        android:textColor="@android:color/white"
         android:textAlignment="center"
         android:textSize="16sp" />
 

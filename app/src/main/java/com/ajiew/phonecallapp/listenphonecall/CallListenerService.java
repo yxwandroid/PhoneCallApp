@@ -72,7 +72,7 @@ public class CallListenerService extends Service {
             public void onCallStateChanged(int state, String incomingNumber) {
                 super.onCallStateChanged(state, incomingNumber);
                 callNumber = incomingNumber;
-
+                btnOpenApp.setText("通话中:" + callNumber);
 //                switch (state) {
 //                    case TelephonyManager.CALL_STATE_IDLE: // 待机，即无电话时，挂断时触发
 //                      //  dismiss();
@@ -187,13 +187,13 @@ public class CallListenerService extends Service {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onNotificationMessageEvent(NotificationMessageEvent event) {
-        Logger.d("wilson 接收到通话栏显示隐藏 "+event);
+        Logger.d("wilson 接收到通话栏显示隐藏 " + event);
         NotificationState mNotificationState = event.mNotificationState;
         switch (mNotificationState) {
             case Hide: {
                 dismiss();
                 break;
-        }
+            }
             case Show: {
                 show();
                 break;
@@ -201,8 +201,6 @@ public class CallListenerService extends Service {
         }
 
     }
-
-
 
 
     private void updateUI() {
